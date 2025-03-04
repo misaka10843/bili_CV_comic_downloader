@@ -1,0 +1,5 @@
+bilibili-api-python~=17.1.2
+asyncio~=3.4.3
+requests~=2.32.3
+cbz~=3.3.7
+httpx
