@@ -1,0 +1,2 @@
+# bili_CV_comic_downloader
+bilibili专栏合集类漫画下载器
