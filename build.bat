@@ -1,0 +1,1 @@
+nuitka --windows-file-version=1.0 --windows-product-version=1.0 --show-progress --standalone --onefile --remove-output --windows-company-name=misaka10843 --windows-product-name=biliCV-comic-downloader  main.py

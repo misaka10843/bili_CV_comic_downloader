@@ -64,11 +64,12 @@ async def get_list(lid):
 
 async def get_co(id):
     a = article.Article(cvid=id)
-    print(id)
+    print(f"专栏cv号：{id}")
     await a.fetch_content()
 
     a = a.json()
     images = extract_images_from_json(a)
+    print("图片列表：")
     print(images)
     cname = a['meta']['title']
     return images, cname
@@ -83,6 +84,7 @@ async def download(path, url):
     response = requests.get(url)
     if not response:
         print(f"图片下载失败，URL：{url}")
+        print("建议稍后重试，防止因b站ban IP图片下载不完整")
         return
     with open(filename, "wb") as f:
         f.write(response.content)
@@ -131,14 +133,17 @@ async def main():
     get_downloaded_list(lid)
     id, title_name = await get_list(lid)
     title_name = title_name.replace(" ", "_").replace(":", "：").replace("?", "？")
-    cindex = 1
+    if ID:
+      cindex = len(ID) + 1
+    else:
+      cindex = 1
     for x in id:
         if x in ID:
             print(f"{x} 已下载，跳过")
             continue
         index = 0
         images, cname = await get_co(x)
-        print(cname)
+        print(f"正在下载：{cname}")
         cname = cname.replace(" ", "_").replace(":", "：").replace("?", "？")
         path = f"{os.path.abspath('.')}/download/{title_name}/{cindex}-{cname}"
         if not os.path.exists(path):
