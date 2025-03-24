@@ -93,7 +93,7 @@ async def download(path, url):
     time.sleep(sleep_time)
 
 
-def c_cbz(path, title_name, cname):
+def c_cbz(path, title_name, cname, cbz_path):
     paths = list(Path(path).iterdir())
     pages = [
         PageInfo.load(
@@ -114,10 +114,13 @@ def c_cbz(path, title_name, cname):
         age_rating=AgeRating.PENDING
     )
     cbz_content = comic.pack()
-    if not os.path.exists(path):
-        os.makedirs(path)
-    cbz_path = PARENT / f'{path}.cbz'
-    cbz_path.write_bytes(cbz_content)
+
+    try:
+        cbz_path.write_bytes(cbz_content)
+    except Exception as e:
+        print(e)
+        exit(1)
+    os.remove(path)
 
 
 async def main():
@@ -125,8 +128,12 @@ async def main():
     parser.add_argument(
         '--lid',
         help='专栏合集的id,例如https://www.bilibili.com/read/readlist/rl843588中843588')
+    parser.add_argument(
+        '--cbz',
+        help='cbz文件夹位置')
 
     lid = parser.parse_args().lid
+    cbz_path = parser.parse_args().cbz
     if lid is None:
         print("没有lid，请输入lid再进行下载")
         exit(1)
@@ -134,9 +141,9 @@ async def main():
     id, title_name = await get_list(lid)
     title_name = title_name.replace(" ", "_").replace(":", "：").replace("?", "？")
     if ID:
-      cindex = len(ID) + 1
+        cindex = len(ID) + 1
     else:
-      cindex = 1
+        cindex = 1
     for x in id:
         if x in ID:
             print(f"{x} 已下载，跳过")
@@ -152,7 +159,10 @@ async def main():
             ipath = f"{path}/{index}.jpg"
             await download(ipath, image)
             index += 1
-        c_cbz(path, title_name, cname)
+        if not os.path.exists(f"{cbz_path}/{title_name}/"):
+            os.makedirs(f"{cbz_path}/{title_name}/")
+        cbz_path = PARENT / f'{cbz_path}/{title_name}/{cindex}-{cname}.cbz'
+        c_cbz(path, title_name, cname, cbz_path)
         cindex += 1
         ID.append(x)
         save_downloaded_list(lid)
