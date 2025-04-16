@@ -12,7 +12,6 @@ from bilibili_api import article
 from cbz.comic import ComicInfo
 from cbz.constants import PageType, YesNo, Manga, AgeRating, Format
 from cbz.page import PageInfo
-from cbz.player import PARENT
 
 ID = []
 
@@ -113,10 +112,8 @@ def c_cbz(path, title_name, cname, cbz_path):
         manga=Manga.YES,
         age_rating=AgeRating.PENDING
     )
-    cbz_content = comic.pack()
-
     try:
-        cbz_path.write_bytes(cbz_content)
+        cbz_path.write_bytes(comic.pack())
     except Exception as e:
         print(e)
         exit(1)
@@ -161,7 +158,7 @@ async def main():
             index += 1
         if not os.path.exists(f"{cbz_path}/{title_name}/"):
             os.makedirs(f"{cbz_path}/{title_name}/")
-        cbz_path = PARENT / f'{cbz_path}/{title_name}/{cindex}-{cname}.cbz'
+        cbz_path = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
         c_cbz(path, title_name, cname, cbz_path)
         cindex += 1
         ID.append(x)
