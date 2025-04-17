@@ -4,6 +4,7 @@ import json
 import os
 import random
 import re
+import shutil
 import time
 from pathlib import Path
 
@@ -117,7 +118,7 @@ def c_cbz(path, title_name, cname, cbz_path):
     except Exception as e:
         print(e)
         exit(1)
-    os.remove(path)
+    shutil.rmtree(path)
 
 
 async def main():
@@ -158,8 +159,8 @@ async def main():
             index += 1
         if not os.path.exists(f"{cbz_path}/{title_name}/"):
             os.makedirs(f"{cbz_path}/{title_name}/")
-        cbz_path = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
-        c_cbz(path, title_name, cname, cbz_path)
+        cbz_fpath = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
+        c_cbz(path, title_name, cname, cbz_fpath)
         cindex += 1
         ID.append(x)
         save_downloaded_list(lid)
