@@ -13,8 +13,10 @@ from bilibili_api import article
 from cbz.comic import ComicInfo
 from cbz.constants import PageType, YesNo, Manga, AgeRating, Format
 from cbz.page import PageInfo
+from rich import print
 
 ID = []
+COUNT = 1
 
 
 def extract_images_from_json(data):
@@ -40,11 +42,12 @@ def extract_images_from_json(data):
 
 
 def get_downloaded_list(lid):
-    global ID
+    global ID, COUNT
     if not os.path.exists(f"{lid}.json"):
         return
     with open(f"{lid}.json", "r") as f:
         ID = json.load(f)
+    COUNT = len(ID)
 
 
 def save_downloaded_list(lid):
@@ -56,7 +59,6 @@ async def get_list(lid):
     id = []
     a = article.ArticleList(rlid=lid)
     info = await a.get_content()
-    print(info['list']['name'])
     for item in info['articles']:
         id.append(item['id'])
     return id, info['list']['name']
@@ -93,7 +95,7 @@ async def download(path, url):
     time.sleep(sleep_time)
 
 
-def c_cbz(path, title_name, cname, cbz_path):
+def c_cbz(path, title_name, cname, cbz_path, cid):
     paths = list(Path(path).iterdir())
     pages = [
         PageInfo.load(
@@ -107,6 +109,8 @@ def c_cbz(path, title_name, cname, cbz_path):
         pages=pages,
         title=cname,
         series=title_name,
+        number=COUNT,
+        alternate_number=cid,
         language_iso='zh',
         format=Format.WEB_COMIC,
         black_white=YesNo.NO,
@@ -154,13 +158,15 @@ async def main():
         if not os.path.exists(path):
             os.makedirs(path)
         for image in images:
-            ipath = f"{path}/{index}.jpg"
+            ipath = f"{path}/{index:03}.jpg"
             await download(ipath, image)
             index += 1
         if not os.path.exists(f"{cbz_path}/{title_name}/"):
             os.makedirs(f"{cbz_path}/{title_name}/")
         cbz_fpath = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
-        c_cbz(path, title_name, cname, cbz_fpath)
+        c_cbz(path, title_name, cname, cbz_fpath, x)
+        global COUNT
+        COUNT += 1
         cindex += 1
         ID.append(x)
         save_downloaded_list(lid)
