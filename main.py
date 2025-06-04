@@ -47,7 +47,7 @@ def get_downloaded_list(lid):
         return
     with open(f"{lid}.json", "r") as f:
         ID = json.load(f)
-    COUNT = len(ID)
+    COUNT = len(ID) + 1
 
 
 def save_downloaded_list(lid):
