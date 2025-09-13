@@ -1,5 +1,5 @@
-bilibili-api-python~=17.1.2
-asyncio~=3.4.3
+bilibili-api-python~=17.3.0
+asyncio~=4.0.0
 requests~=2.32.3
 git+https://github.com/misaka10843/cbz.git
 httpx

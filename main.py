@@ -96,7 +96,7 @@ async def download(path, url):
 
 
 def c_cbz(path, title_name, cname, cbz_path, cid):
-    paths = list(Path(path).iterdir())
+    paths = sorted(Path(path).iterdir(), key=lambda x: x.name)
     pages = [
         PageInfo.load(
             path=path,
