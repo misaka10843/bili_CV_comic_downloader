@@ -131,45 +131,75 @@ async def main():
         '--lid',
         help='专栏合集的id,例如https://www.bilibili.com/read/readlist/rl843588中843588')
     parser.add_argument(
+        '--cid',
+        help='专栏的cvid,例如https://www.bilibili.com/read/cv40061677中40061677')
+    parser.add_argument(
         '--cbz',
         help='cbz文件夹位置')
 
-    lid = parser.parse_args().lid
-    cbz_path = parser.parse_args().cbz
-    if lid is None:
-        print("没有lid，请输入lid再进行下载")
-        exit(1)
-    get_downloaded_list(lid)
-    id, title_name = await get_list(lid)
-    title_name = title_name.replace(" ", "_").replace(":", "：").replace("?", "？")
-    if ID:
-        cindex = len(ID) + 1
-    else:
-        cindex = 1
-    for x in id:
-        if x in ID:
-            print(f"{x} 已下载，跳过")
-            continue
-        index = 0
-        images, cname = await get_co(x)
-        print(f"正在下载：{cname}")
+    args = parser.parse_args()
+    lid = args.lid
+    cid = args.cid
+    cbz_path = args.cbz
+
+    # 优先处理单个专栏
+    if cid is not None:
+        print(f"下载单个专栏: {cid}")
+        images, cname = await get_co(cid)
         cname = cname.replace(" ", "_").replace(":", "：").replace("?", "？")
-        path = f"{os.path.abspath('.')}/download/{title_name}/{cindex}-{cname}"
+        path = f"{os.path.abspath('.')}/download/Single/{cname}"
         if not os.path.exists(path):
             os.makedirs(path)
+
+        index = 0
         for image in images:
             ipath = f"{path}/{index:03}.jpg"
             await download(ipath, image)
             index += 1
-        if not os.path.exists(f"{cbz_path}/{title_name}/"):
-            os.makedirs(f"{cbz_path}/{title_name}/")
-        cbz_fpath = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
-        c_cbz(path, title_name, cname, cbz_fpath, x)
-        global COUNT
-        COUNT += 1
-        cindex += 1
-        ID.append(x)
-        save_downloaded_list(lid)
+
+        if not os.path.exists(f"{cbz_path}/Single/"):
+            os.makedirs(f"{cbz_path}/Single/")
+        cbz_fpath = Path(f'{cbz_path}/Single/') / f'{cname}.cbz'
+        #c_cbz(path, "Single", cname, cbz_fpath, cid)
+        return
+
+    # 处理合集
+    if lid is not None:
+        get_downloaded_list(lid)
+        id, title_name = await get_list(lid)
+        title_name = title_name.replace(" ", "_").replace(":", "：").replace("?", "？")
+        if ID:
+            cindex = len(ID) + 1
+        else:
+            cindex = 1
+        for x in id:
+            if x in ID:
+                print(f"{x} 已下载，跳过")
+                continue
+            index = 0
+            images, cname = await get_co(x)
+            print(f"正在下载：{cname}")
+            cname = cname.replace(" ", "_").replace(":", "：").replace("?", "？")
+            path = f"{os.path.abspath('.')}/download/{title_name}/{cindex}-{cname}"
+            if not os.path.exists(path):
+                os.makedirs(path)
+            for image in images:
+                ipath = f"{path}/{index:03}.jpg"
+                await download(ipath, image)
+                index += 1
+            if not os.path.exists(f"{cbz_path}/{title_name}/"):
+                os.makedirs(f"{cbz_path}/{title_name}/")
+            cbz_fpath = Path(f'{cbz_path}/{title_name}/') / f'{cindex}-{cname}.cbz'
+            c_cbz(path, title_name, cname, cbz_fpath, x)
+            global COUNT
+            COUNT += 1
+            cindex += 1
+            ID.append(x)
+            save_downloaded_list(lid)
+        return
+
+    print("没有提供lid或cid，请输入lid或cid再进行下载")
+    exit(1)
 
 
 if __name__ == "__main__":
