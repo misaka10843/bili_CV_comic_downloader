@@ -18,6 +18,9 @@ from rich import print
 ID = []
 COUNT = 1
 
+def clean_filename(filename):
+    invalid_chars = r'[\\/:*?"<>|]'
+    return re.sub(invalid_chars, "_", filename)
 
 def extract_images_from_json(data):
     images = []
@@ -112,6 +115,7 @@ async def download(path, url):
 
 
 def c_cbz(path, title_name, cname, cbz_path, cid):
+    cbz_path.parent.mkdir(parents=True, exist_ok=True)
     paths = sorted(Path(path).iterdir(), key=lambda x: x.name)
     pages = [
         PageInfo.load(
@@ -162,7 +166,7 @@ async def main():
     if cid is not None:
         print(f"下载单个专栏: {cid}")
         images, cname = await get_co(cid)
-        cname = cname.replace(" ", "_").replace(":", "：").replace("?", "？")
+        cname = clean_filename(cname)
         path = f"{os.path.abspath('.')}/download/Single/{cname}"
         if not os.path.exists(path):
             os.makedirs(path)
@@ -195,7 +199,7 @@ async def main():
             index = 0
             images, cname = await get_co(x)
             print(f"正在下载：{cname}")
-            cname = cname.replace(" ", "_").replace(":", "：").replace("?", "？")
+            cname = clean_filename(cname)
             path = f"{os.path.abspath('.')}/download/{title_name}/{cindex}-{cname}"
             if not os.path.exists(path):
                 os.makedirs(path)
