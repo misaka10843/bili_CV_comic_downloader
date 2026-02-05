@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/download" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (bili_CV_comic_downloader)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (bili_CV_comic_downloader)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

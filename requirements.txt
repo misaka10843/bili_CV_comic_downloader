@@ -1,6 +1,7 @@
-bilibili-api-python~=17.3.0
-asyncio~=4.0.0
-requests~=2.32.3
+bilibili-api-dev
+asyncio
+requests
 git+https://github.com/misaka10843/cbz.git
 httpx
 rich
+chompjs

@@ -22,23 +22,39 @@ COUNT = 1
 def extract_images_from_json(data):
     images = []
 
-    def traverse_children(children):
-        for child in children:
-            if child["type"] == "ImageNode" and "url" in child:
-                if child["url"].startswith("https://i0.hdslb.com"):
-                    images.append(child["url"])
-            elif child["type"] == "TextNode":
-                try:
-                    text = child["text"]
-                    image_urls = re.findall(r'https://i0.hdslb.com[^\s"]+', text)
-                    images.extend(image_urls)
-                except KeyError:
-                    pass
-            elif "children" in child:
-                traverse_children(child["children"])
+    try:
+        opus_content = data.get("meta", {}).get("opus", {}).get("content", {})
+        paragraphs = opus_content.get("paragraphs", [])
+        for para in paragraphs:
+            # para_type 为 2 通常代表图片节点
+            if para.get("para_type") == 2 and "pic" in para:
+                for pic in para["pic"].get("pics", []):
+                    if "url" in pic:
+                        images.append(pic["url"])
+    except Exception as e:
+        print(f"[bold yellow]警告：尝试从 Opus 结构提取图片失败: {e}[/bold yellow]")
 
-    traverse_children(data.get("children", []))
-    return images
+    if not images:
+        def traverse_children(children):
+            for child in children:
+                if child.get("type") == "ImageNode" and "url" in child:
+                    images.append(child["url"])
+                elif child.get("type") == "TextNode":
+                    text = child.get("text", "")
+                    image_urls = re.findall(r'https?://i0\.hdslb\.com[^\s"\'}]+', text)
+                    images.extend(image_urls)
+                elif "children" in child:
+                    traverse_children(child["children"])
+
+        traverse_children(data.get("children", []))
+
+    unique_images = []
+    for img in images:
+        img_url = img.replace("http://", "https://")
+        if img_url not in unique_images:
+            unique_images.append(img_url)
+
+    return unique_images
 
 
 def get_downloaded_list(lid):
